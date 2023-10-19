@@ -1,0 +1,168 @@
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema Integrador
+-- -----------------------------------------------------
+DROP SCHEMA IF EXISTS `Integrador` ;
+
+-- -----------------------------------------------------
+-- Schema Integrador
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `Integrador` DEFAULT CHARACTER SET utf8 ;
+USE `Integrador` ;
+
+--------------------------------------------------------
+
+-- Define las tablas
+
+-- Tabla Cliente
+DROP TABLE IF EXISTS `Inegrador`.`Cliente` ;
+
+CREATE TABLE IF NOT EXISTS Cliente (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(30),
+    apellido VARCHAR(30),
+    direccion VARCHAR(30),
+    telefono VARCHAR(20),
+    correo_electronico VARCHAR(50),
+    fecha_de_registro TIMESTAMP
+);
+
+-- Tabla Producto
+DROP TABLE IF EXISTS `Inegrador`.`Producto` ;
+CREATE TABLE IF NOT EXISTS Producto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(30),
+    descripcion TEXT,
+    precio DECIMAL(10, 2),
+    stock_disponible INT
+);
+
+
+-- Tabla Pedido
+DROP TABLE IF EXISTS `Inegrador`.`Pedido` ;
+CREATE TABLE IF NOT EXISTS Pedido (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fecha_del_pedido TIMESTAMP,
+    estado VARCHAR(50)
+);
+
+-- Tabla Detalle del Pedido
+DROP TABLE IF EXISTS `Inegrador`.`DetalleDelPedido` ;
+CREATE TABLE IF NOT EXISTS DetalleDelPedido (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cantidad INT,
+    talla VARCHAR(20),
+    precio_unitario DECIMAL(10, 2),
+    productoId INT,
+    pedidoId INT
+);
+
+-- Tabla Inventario
+DROP TABLE IF EXISTS `Inegrador`.`Inventario` ;
+CREATE TABLE IF NOT EXISTS Inventario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cantidad_en_stock INT,
+    productoId INT
+);
+
+
+-- Tabla Rol
+DROP TABLE IF EXISTS `Inegrador`.`Rol` ;
+CREATE TABLE IF NOT EXISTS Rol (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255)
+);
+
+-- Tabla Usuario
+DROP TABLE IF EXISTS `Inegrador`.`Usuario` ;
+CREATE TABLE IF NOT EXISTS Usuario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(50) NOT NULL,
+    nickname VARCHAR(50) NOT NULL,
+    password VARCHAR(250) NOT NULL,
+    rol INT NOT NULL,
+    FOREIGN KEY (rol) REFERENCES Rol(id)
+);
+
+-- Define las relaciones
+
+-- Relación Cliente - Pedido
+ALTER TABLE Pedido
+ADD COLUMN clienteId INT,
+ADD FOREIGN KEY (clienteId)
+REFERENCES Cliente(id);
+
+-- Relación Pedido - Detalle del Pedido
+ALTER TABLE DetalleDelPedido
+ADD FOREIGN KEY (pedidoId)
+REFERENCES Pedido(id);
+
+-- Relación Producto - Detalle del Pedido
+ALTER TABLE DetalleDelPedido
+ADD FOREIGN KEY (productoId)
+REFERENCES Producto(id);
+
+-- Relación Producto - Inventario
+ALTER TABLE Inventario
+ADD FOREIGN KEY (productoId)
+REFERENCES Producto(id);
+
+-- Relación Producto - Categoria de Producto
+ALTER TABLE Producto
+ADD COLUMN categoriaDeProductoId INT,
+ADD FOREIGN KEY (categoriaDeProductoId)
+REFERENCES CategoriaDeProducto(id);
+
+
+-- Relación Usuario - Rol
+ALTER TABLE Usuario
+ADD FOREIGN KEY (rol)
+REFERENCES Rol(id);
+
+INSERT INTO `integrador`.`rol` (`id`, `nombre`) VALUES ('1', 'Administrador');
+INSERT INTO `integrador`.`rol` (`id`, `nombre`) VALUES ('2', 'Cliente');
+ALTER TABLE Cliente
+ADD COLUMN usuarioId INT,
+ADD FOREIGN KEY (usuarioId)
+REFERENCES Usuario(id);
+
+INSERT INTO `integrador`.`usuario` (`id`, `email`, `nickname`, `password`, `rol`) VALUES ('1', 'admin@admin.com', 'admin', '1234', '1');
+
+ALTER TABLE `integrador`.`usuario` 
+DROP FOREIGN KEY `usuario_ibfk_1`,
+DROP FOREIGN KEY `usuario_ibfk_2`;
+ALTER TABLE `integrador`.`usuario` 
+CHANGE COLUMN `rol` `rol` INT NOT NULL DEFAULT 2 ,
+ADD UNIQUE INDEX `nickname_UNIQUE` (`nickname` ASC) VISIBLE;
+;
+ALTER TABLE `integrador`.`usuario` 
+ADD CONSTRAINT `usuario_ibfk_1`
+  FOREIGN KEY (`rol`)
+  REFERENCES `integrador`.`rol` (`id`),
+ADD CONSTRAINT `usuario_ibfk_2`
+  FOREIGN KEY (`rol`)
+  REFERENCES `integrador`.`rol` (`id`);
+
+ALTER TABLE Producto
+ADD FOREIGN KEY (categoriaDeProductoId)
+REFERENCES CategoriaDeProducto(id);
+
+ALTER TABLE DetalleDelPedido
+ADD FOREIGN KEY (productoId)
+REFERENCES Producto(id);
+
+ALTER TABLE DetalleDelPedido
+ADD FOREIGN KEY (pedidoId)
+REFERENCES Pedido(id);
+
+ALTER TABLE Inventario
+ADD FOREIGN KEY (productoId)
+REFERENCES Producto(id);
+
+

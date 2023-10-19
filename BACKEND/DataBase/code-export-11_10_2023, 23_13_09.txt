@@ -1,0 +1,72 @@
+// define tables
+cliente [icon: user]{
+  id string pk
+  nombre string
+  apellido string
+  direccion string
+  telefono string
+  correo_electronico string
+  fecha_de_registro timestamp
+}
+
+producto [icon: box]{
+  id string pk
+  nombre string
+  descripcion string
+  precio number
+  stock_disponible number
+}
+
+categoria_de_producto [icon: tag]{
+  id string pk
+  nombre string
+}
+
+pedido [icon: clipboard]{
+  id string pk
+  fecha_del_pedido timestamp
+  estado string
+}
+
+detalle_del_pedido [icon: list]{
+  id string pk
+  cantidad number
+  talla string
+  precio_unitario number
+  productoId string
+  pedidoId string
+}
+
+inventario [icon: archive]{
+  id string pk
+  cantidad_en_stock number
+  productoId string
+}
+
+empleado [icon: user-check]{
+  id string pk
+  nombre string
+  apellido string
+  direccion string
+  telefono string
+  correo_electronico string
+  cargo string
+}
+
+proveedor [icon: truck]{
+  id string pk
+  nombre_de_la_empresa string
+  nombre_del_contacto string
+  telefono_de_contacto string
+  correo_electronico_de_contacto string
+}
+
+// define relationships
+cliente.id <> pedido.clienteId
+pedido.id <> detalle_del_pedido.pedidoId
+producto.id <> detalle_del_pedido.productoId
+producto.id <> inventario.productoId
+producto.id <> categoria_de_producto.productoId
+empleado.id <> pedido.empleadoId
+proveedor.id <> producto.proveedorId
+
